@@ -1,0 +1,4 @@
+/.idea/
+var/
+.env
+/serts/*.pem
