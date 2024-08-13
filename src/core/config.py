@@ -2,11 +2,12 @@ from pathlib import Path
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel
 
-BASE_DIR = Path(__file__).parent.parent
+BASE_DIR = Path(__file__).parent.parent.parent
 
 DB_PATH = BASE_DIR / "chat.sqlite3"
 
 COOKIE_NAME = "bonds_chat"
+
 
 class DbSetting(BaseSettings):
     url: str = f"sqlite+aiosqlite:///{DB_PATH}"
