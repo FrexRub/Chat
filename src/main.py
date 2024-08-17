@@ -1,10 +1,11 @@
 import logging
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import HTMLResponse
 from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
-from src.core.config import configure_logging
+from src.core.config import configure_logging, templates
 
 configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,9 +33,12 @@ app.add_middleware(
 )
 
 
-@app.get("/")
-def start_project():
-    return "Hello"
+@app.get("/", name="main:index", response_class=HTMLResponse)
+def main_index(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+    )
 
 
 if __name__ == "__main__":

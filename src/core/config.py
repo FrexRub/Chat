@@ -1,6 +1,7 @@
 from pathlib import Path
 import logging
 
+from fastapi.templating import Jinja2Templates
 from pydantic_settings import BaseSettings
 from pydantic import BaseModel
 
@@ -9,6 +10,9 @@ BASE_DIR = Path(__file__).parent.parent.parent
 DB_PATH = BASE_DIR / "chat.sqlite3"
 
 COOKIE_NAME = "bonds_chat"
+
+
+templates = Jinja2Templates("templates")
 
 
 def configure_logging(level=logging.INFO):
