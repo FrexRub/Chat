@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 
 from src.core.config import configure_logging, templates
+from src.users.routers import router as router_users
 
 configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)
@@ -31,6 +32,9 @@ app.add_middleware(
         "Authorization",
     ],
 )
+
+
+app.include_router(router_users)
 
 
 @app.get("/", name="main:index", response_class=HTMLResponse)

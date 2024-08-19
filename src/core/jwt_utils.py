@@ -2,7 +2,7 @@ from fastapi import Response
 import bcrypt
 import jwt
 
-from config import setting, COOKIE_NAME
+from src.core.config import setting, COOKIE_NAME
 
 
 def create_hash_password(password: str) -> bytes:

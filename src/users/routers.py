@@ -6,6 +6,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.core.config import templates
 from src.core.database import get_async_session
 from src.users.models import User
+from src.users.crud import get_user_from_db, create_user, add_user_to_db
+from src.core.exceptions import NotFindUser, ExceptDB
 
 router = APIRouter(prefix="/users", tags=[])
 
@@ -34,8 +36,11 @@ async def regdata(
     password=Form(),
     session: AsyncSession = Depends(get_async_session),
 ):
-    find_user: User = await get_user_from_db(name=email, session=session)
-    if find_user:
+    try:
+        find_user: User = await get_user_from_db(email=email, session=session)
+    except NotFindUser:
+        user: User = create_user(username, email, password)
+    else:
         return templates.TemplateResponse(
             request=request,
             name="error.html",
@@ -44,22 +49,10 @@ async def regdata(
                 "text_error": "Клиент с данным email уже существует",
             },
         )
-    hash_password = create_hash_password(password).decode()
-    user: User = User(
-        user=username,
-        email=email,
-        hashed_password=hash_password,
-        is_active=True,
-        is_superuser=False,
-        is_verified=False,
-    )
+
     try:
         id: int = await add_user_to_db(session=session, user=user)
-    except ExceptDB as exc:
-        # raise HTTPException(
-        #         status_code=status.HTTP_401_UNAUTHORIZED,
-        #         detail=f"invalid add user in DB: {exc}"
-        #     )
+    except ExceptDB:
         return templates.TemplateResponse(
             request=request,
             name="error.html",
@@ -70,3 +63,4 @@ async def regdata(
         )
     else:
         return {"id": id}
+
