@@ -11,16 +11,31 @@ from src.core.database import get_async_session
 from src.users.models import User
 from src.users.crud import get_user_from_db, create_user, add_user_to_db
 from src.core.exceptions import NotFindUser, ExceptDB
-from src.core.jwt_utils import validate_password, encode_jwt, set_cookie
+from src.core.jwt_utils import validate_password, encode_jwt, set_cookie, decode_jwt
 
 router = APIRouter(prefix="/users", tags=[])
 
 
-def get_token(request: Request):
+def get_token(request: Request) -> str:
+    """
+     Получение jwt токена из cookie
+    :param request: Request
+    :return: str
+        jwt токен
+    """
     token = request.cookies.get(COOKIE_NAME)
     if not token:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token not found")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token not found"
+        )
     return token
+
+
+def current_active_user(
+    token: str = Depends(get_token), session: AsyncSession = Depends(get_async_session)
+):
+    payload = decode_jwt(token)
+    id_user: int = int(payload["sub"])
 
 
 @router.get("/registration", name="users:registration", response_class=HTMLResponse)

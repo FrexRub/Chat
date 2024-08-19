@@ -28,6 +28,10 @@ async def get_user_from_db(session: AsyncSession, email: str) -> User:
     return user
 
 
+async def get_user_by_id(session: AsyncSession, id_user: int) -> User:
+    return await session.get(User, id_user)
+
+
 def create_user(username: str, email: str, password: str) -> User:
     logger.info("Start create user with email %s", email)
     hash_password = create_hash_password(password).decode()
