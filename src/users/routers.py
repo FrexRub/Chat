@@ -1,6 +1,9 @@
-from fastapi import APIRouter, Request, Depends, Form
-from fastapi.responses import HTMLResponse, JSONResponse
+from datetime import datetime, timedelta, timezone
+
+from fastapi import APIRouter, Request, Depends, Form, status
+from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import templates
@@ -8,6 +11,7 @@ from src.core.database import get_async_session
 from src.users.models import User
 from src.users.crud import get_user_from_db, create_user, add_user_to_db
 from src.core.exceptions import NotFindUser, ExceptDB
+from src.core.jwt_utils import validate_password, encode_jwt, set_cookie
 
 router = APIRouter(prefix="/users", tags=[])
 
@@ -25,7 +29,36 @@ async def login(
     data: OAuth2PasswordRequestForm = Depends(),
     session: AsyncSession = Depends(get_async_session),
 ):
-    pass
+    username = data.username
+    password = data.password
+    try:
+        user: User = await get_user_from_db(email=username, session=session)
+    except NotFindUser:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"User {username} not found",
+        )
+
+    if not validate_password(
+        password=password,
+        hashed_password=user.hashed_password.encode(),
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Error password for login: {username}",
+        )
+
+    payload = dict()
+    payload["sub"] = str(user.id)
+    expire = datetime.now(timezone.utc) + timedelta(seconds=900)
+    payload["exp"] = expire
+    access_token = encode_jwt(payload)
+
+    resp = RedirectResponse(
+        url="/users/protected-route", status_code=status.HTTP_302_FOUND
+    )
+    set_cookie(resp, access_token)
+    return resp
 
 
 @router.post("/regdata", response_class=JSONResponse)
@@ -64,3 +97,8 @@ async def regdata(
     else:
         return {"id": id}
 
+
+@router.get("/protected-route")
+async def protected_route():
+    # async def protected_route(user: User = Depends(current_active_user)):
+    return f"Hello, USer"

@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 async def get_user_from_db(session: AsyncSession, email: str) -> User:
     logger.info("Start find user by email: %s", email)
-    stmt = select(User).where(User.email)
+    stmt = select(User).where(User.email == email)
     res: Result = await session.execute(stmt)
     user: Optional[User] = res.scalars().one_or_none()
     if not user:
