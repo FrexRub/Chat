@@ -6,7 +6,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.config import templates
+from src.core.config import templates, COOKIE_NAME
 from src.core.database import get_async_session
 from src.users.models import User
 from src.users.crud import get_user_from_db, create_user, add_user_to_db
@@ -14,6 +14,13 @@ from src.core.exceptions import NotFindUser, ExceptDB
 from src.core.jwt_utils import validate_password, encode_jwt, set_cookie
 
 router = APIRouter(prefix="/users", tags=[])
+
+
+def get_token(request: Request):
+    token = request.cookies.get(COOKIE_NAME)
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Token not found")
+    return token
 
 
 @router.get("/registration", name="users:registration", response_class=HTMLResponse)
