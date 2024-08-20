@@ -26,3 +26,15 @@ async def add_new_post(session: AsyncSession, post: PostCreate, id_user: int) ->
     session.add(new_post)
     await session.commit()
     return new_post.id
+
+
+async def delete_post(session: AsyncSession, id_post: int, id_user: int) -> bool:
+    stmt = select(Post).where(Post.id == id_post)
+    res = await session.execute(stmt)
+    post: Post = res.scalars().first()
+    if post.id_user == id_user:
+        await session.delete(post)
+        await session.commit()
+        return True
+    else:
+        return False
