@@ -14,7 +14,7 @@ from src.core.exceptions import NotFindUser, ExceptDB
 from src.core.jwt_utils import validate_password, encode_jwt, set_cookie
 from src.users.depends import current_active_user
 
-router = APIRouter(prefix="/users", tags=[])
+router = APIRouter(prefix="/users", tags=["User"])
 
 
 @router.get("/registration", name="users:registration", response_class=HTMLResponse)

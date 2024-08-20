@@ -5,6 +5,7 @@ from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.posts.models import Post
+from src.posts.schemas import PostCreate
 
 
 async def get_post_from_db(
@@ -19,4 +20,9 @@ async def get_post_from_db(
     return list(posts)
 
 
-# async def_
+async def add_new_post(session: AsyncSession, post: PostCreate, id_user: int) -> int:
+    new_post: Post = Post(**post.model_dump())
+    new_post.id_user = id_user
+    session.add(new_post)
+    await session.commit()
+    return new_post.id
