@@ -2,40 +2,41 @@ from datetime import datetime, timedelta, timezone
 
 from fastapi import APIRouter, Request, Depends, Form, status
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import OAuth2PasswordRequestForm, APIKeyCookie, APIKeyHeader
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import templates, COOKIE_NAME
 from src.core.database import get_async_session
 from src.users.models import User
-from src.users.crud import get_user_from_db, create_user, add_user_to_db
+from src.users.crud import get_user_from_db, create_user, add_user_to_db, get_user_by_id
 from src.core.exceptions import NotFindUser, ExceptDB
 from src.core.jwt_utils import validate_password, encode_jwt, set_cookie, decode_jwt
 
 router = APIRouter(prefix="/users", tags=[])
 
-
-def get_token(request: Request) -> str:
-    """
-     Получение jwt токена из cookie
-    :param request: Request
-    :return: str
-        jwt токен
-    """
-    token = request.cookies.get(COOKIE_NAME)
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token not found"
-        )
-    return token
+cookie_scheme = APIKeyCookie(name=COOKIE_NAME)
+header_scheme = APIKeyHeader(
+    name="x-key"
+)  # используется в случаи наличия токена в заголовке
 
 
-def current_active_user(
-    token: str = Depends(get_token), session: AsyncSession = Depends(get_async_session)
+async def current_active_user(
+    token: str = Depends(cookie_scheme),
+    session: AsyncSession = Depends(get_async_session),
 ):
+    if token is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not authorized"
+        )
     payload = decode_jwt(token)
     id_user: int = int(payload["sub"])
+    user: User = await get_user_by_id(session=session, id_user=id_user)
+    if not user.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not activate"
+        )
+    return user.email
 
 
 @router.get("/registration", name="users:registration", response_class=HTMLResponse)
@@ -121,6 +122,5 @@ async def regdata(
 
 
 @router.get("/protected-route")
-async def protected_route():
-    # async def protected_route(user: User = Depends(current_active_user)):
-    return f"Hello, USer"
+async def protected_route(user: str = Depends(current_active_user)):
+    return f"Hello, USer {user}"
