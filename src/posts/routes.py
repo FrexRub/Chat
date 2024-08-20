@@ -1,4 +1,6 @@
-from fastapi import APIRouter, Depends
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, Path
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -16,6 +18,15 @@ router = APIRouter(prefix="/posts", tags=["Post"])
 async def get_all_posts(session: AsyncSession = Depends(get_async_session)):
     posts: list[Post] = await get_post_from_db(session)
     return posts
+
+
+@router.get("/{id}")
+async def get_posts_user_by_id(
+        id: Annotated[int, Path()],
+        session: AsyncSession = Depends(get_async_session)):
+    posts: list[Post] = await get_post_from_db(session=session, id_user=id)
+    return posts
+
 
 
 @router.post("/", response_class=JSONResponse)
