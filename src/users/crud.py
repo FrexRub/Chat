@@ -29,7 +29,12 @@ async def get_user_from_db(session: AsyncSession, email: str) -> User:
 
 
 async def get_user_by_id(session: AsyncSession, id_user: int) -> User:
-    return await session.get(User, id_user)
+    logger.info("Start find user by id %s", id_user)
+    stmt = select(User).where(User.id == id_user)
+    res: Result = await session.execute(stmt)
+    user: User = res.scalars().first()
+    logger.info("User by id %s", user.email)
+    return user
 
 
 def create_user(username: str, email: str, password: str) -> User:
