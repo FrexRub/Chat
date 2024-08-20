@@ -7,6 +7,7 @@ import uvicorn
 
 from src.core.config import configure_logging, templates
 from src.users.routers import router as router_users
+from src.posts.routes import router as router_posts
 
 configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)
@@ -35,6 +36,7 @@ app.add_middleware(
 
 
 app.include_router(router_users)
+app.include_router(router_posts)
 
 
 @app.get("/", name="main:index", response_class=HTMLResponse)
