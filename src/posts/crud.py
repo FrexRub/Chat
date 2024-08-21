@@ -2,11 +2,12 @@ from typing import Optional
 import logging
 
 from sqlalchemy import select, desc
+from sqlalchemy.orm import joinedload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
 from src.posts.models import Post
-from src.posts.schemas import PostCreate
+from src.posts.schemas import PostCreate, PostWithAutor
 from src.core.config import configure_logging
 from src.core.exceptions import ExceptDB
 
@@ -84,3 +85,26 @@ async def delete_post(session: AsyncSession, id_post: int, id_user: int) -> bool
             return True
     else:
         return False
+
+
+async def get_post_with_user_from_db(session: AsyncSession) -> list[PostWithAutor]:
+    """
+        Возвращает список постов с автором
+    :param session: AsyncSession
+        сессия ДБ
+    :return: list[PostWithAutor]
+        Список постов с автором
+    """
+    stmt = select(Post).options(joinedload(Post.user))
+    posts = await session.scalars(stmt)
+    lst_posts: list[PostWithAutor] = list()
+    for post in posts:  # type: Post
+        print(post.title, post.body, post.date_creation, post.user.username)
+        post_with_author: PostWithAutor = PostWithAutor(
+            user=post.user.username,
+            title=post.title,
+            body=post.body,
+            data_create=post.date_creation,
+        )
+        lst_posts.append(post_with_author)
+    return lst_posts
