@@ -2,7 +2,6 @@ from typing import Optional
 import logging
 
 from sqlalchemy import select, desc
-from sqlalchemy.engine import Result
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
 
