@@ -1,10 +1,12 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path
+from fastapi import APIRouter, Depends, Path, Request
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_async_session
+from src.core.config import templates
+from src.core.exceptions import ExceptDB
 from src.posts.models import Post
 from src.posts.schemas import PostCreate, PostRead
 from src.posts.crud import get_post_from_db, add_new_post, delete_post
@@ -30,11 +32,23 @@ async def get_posts_user_by_id(
 
 @router.post("/", response_class=JSONResponse)
 async def create_new_post(
+    request: Request,
     post: PostCreate,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_active_user),
 ):
-    id: int = await add_new_post(session=session, post=post, id_user=user.id)
+    try:
+        id: int = await add_new_post(session=session, post=post, id_user=user.id)
+    except ExceptDB:
+        return templates.TemplateResponse(
+            request=request,
+            name="error.html",
+            context={
+                "title_error": "Проблема c добавлением поста",
+                "text_error": "Ошибка в БД",
+            },
+            status_code=404,
+        )
     return {"id": id}
 
 
