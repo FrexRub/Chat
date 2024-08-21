@@ -1,6 +1,6 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, Path, Request
+from fastapi import APIRouter, Depends, Path, Request, status
 from fastapi.responses import JSONResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,7 +30,7 @@ async def get_posts_user_by_id(
     return posts
 
 
-@router.post("/", response_class=JSONResponse)
+@router.post("/", response_class=JSONResponse, status_code=status.HTTP_201_CREATED)
 async def create_new_post(
     request: Request,
     post: PostCreate,
@@ -55,8 +55,20 @@ async def create_new_post(
 @router.delete("/{id}", response_class=JSONResponse)
 async def delete_post_by_id(
     id: Annotated[int, Path()],
+    request: Request,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_active_user),
 ):
-    res: bool = await delete_post(session=session, id_post=id, id_user=user.id)
+    try:
+        res: bool = await delete_post(session=session, id_post=id, id_user=user.id)
+    except ExceptDB:
+        return templates.TemplateResponse(
+            request=request,
+            name="error.html",
+            context={
+                "title_error": "Проблема c удалением поста",
+                "text_error": "Ошибка в БД",
+            },
+            status_code=404,
+        )
     return bool(res)

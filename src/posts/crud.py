@@ -60,12 +60,28 @@ async def add_new_post(session: AsyncSession, post: PostCreate, id_user: int) ->
 
 
 async def delete_post(session: AsyncSession, id_post: int, id_user: int) -> bool:
+    """
+        Удаление поста пользователя
+    :param session: AsyncSession
+        сессия БД
+    :param id_post: int
+        id удаленного поста
+    :param id_user: int
+        id пользователя
+    :return: bool
+        статус выполнения операции удаления
+    """
     stmt = select(Post).where(Post.id == id_post)
     res = await session.execute(stmt)
     post: Post = res.scalars().first()
     if post.id_user == id_user:
-        await session.delete(post)
-        await session.commit()
-        return True
+        try:
+            await session.delete(post)
+            await session.commit()
+        except SQLAlchemyError:
+            logger.exception("Error delete post")
+            raise ExceptDB("Error in DB")
+        else:
+            return True
     else:
         return False
