@@ -26,3 +26,6 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     posts: Mapped[list["Post"]] = relationship(back_populates="user")
+    like_post: Mapped["Post"] = relationship(
+        secondary="likes_post", back_populates="like_user"
+    )

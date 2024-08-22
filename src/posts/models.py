@@ -1,8 +1,17 @@
 from typing import TYPE_CHECKING
 from datetime import datetime
 
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import DateTime, ForeignKey, String, Text, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship, object_session
+from sqlalchemy.ext.hybrid import hybrid_property
+from sqlalchemy import (
+    DateTime,
+    ForeignKey,
+    UniqueConstraint,
+    String,
+    Text,
+    func,
+    select,
+)
 
 from src.core.database import Base
 
@@ -24,9 +33,38 @@ class Post(Base):
     id_user: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     user: Mapped["User"] = relationship(back_populates="posts")
+    like_user: Mapped["User"] = relationship(
+        secondary="likes_post", back_populates="like_post"
+    )
+
+    @hybrid_property
+    def like_count(self):
+        query = select(func.count(LikesPost.post_id)).where(
+            LikesPost.post_id == self.id
+        )
+        result = object_session(self).execute(query)
+        return result.scalars().one()
+
+    @like_count.expression
+    def like_count(cls):
+        return (
+            select(func.count(LikesPost.post_id))
+            .where(LikesPost.post_id == cls.id)
+            .label("like_count")
+        )
 
     def __str__(self):
         return f"{self.__class__.__name__}(id={self.id}, title={self.title!r}, user_id={self.user_id})"
 
-    def repr(self):
+    def __repr__(self):
         return str(self)
+
+
+class LikesPost(Base):
+    __tablename__ = "likes_post"
+    __table_args__ = (
+        UniqueConstraint("user_id", "post_id", name="idx_unique_user_tweet"),
+    )
+
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
