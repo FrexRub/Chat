@@ -1,7 +1,8 @@
-from typing import Annotated
+from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends, Path, Request, status
+from fastapi import APIRouter, Depends, Path, Request, status, Response
 from fastapi.responses import JSONResponse
+from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_async_session
@@ -14,6 +15,7 @@ from src.posts.crud import (
     add_new_post,
     delete_post,
     get_post_with_user_from_db,
+    add_like_post,
 )
 from src.users.depends import current_active_user
 from src.users.models import User
@@ -88,3 +90,20 @@ async def get_posts_with_user(
 ):
     posts: list[PostWithAutor] = await get_post_with_user_from_db(session)
     return posts
+
+
+@router.post(
+    "/{id}/likes",
+    status_code=201,
+    response_class=JSONResponse,
+)
+async def post_like_post(
+    response: Response,
+    id: Annotated[int, Path(gt=0)],
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(current_active_user),
+) -> Optional[dict[str, bool]]:
+    res: bool = await add_like_post(session=session, id_post=id, id_user=user.id)
+    if not res:
+        response.status_code = 400
+    return {"result": res}

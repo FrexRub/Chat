@@ -33,8 +33,10 @@ class Post(Base):
     id_user: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
     user: Mapped["User"] = relationship(back_populates="posts")
-    like_user: Mapped["User"] = relationship(
-        secondary="likes_post", back_populates="like_post"
+    like_user: Mapped[list["User"]] = relationship(
+        secondary="likes_post",
+        back_populates="like_post",
+        uselist=True,
     )
 
     @hybrid_property
@@ -68,3 +70,6 @@ class LikesPost(Base):
 
     post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+
+    # user: Mapped["User"] = relationship(back_populates="user_details")
+    # product: Mapped["Product"] = relationship(back_populates="orders_details")

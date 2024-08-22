@@ -2,14 +2,16 @@ from typing import Optional
 import logging
 
 from sqlalchemy import select, desc
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.engine import Result
 
 from src.posts.models import Post
 from src.posts.schemas import PostCreate, PostWithAutor
 from src.core.config import configure_logging
 from src.core.exceptions import ExceptDB
+from src.users.models import User
 
 
 configure_logging(logging.INFO)
@@ -108,3 +110,39 @@ async def get_post_with_user_from_db(session: AsyncSession) -> list[PostWithAuto
         )
         lst_posts.append(post_with_author)
     return lst_posts
+
+
+async def add_like_post(session: AsyncSession, id_post: int, id_user: int) -> bool:
+    """
+        Добавление лайка к посту
+    :param session: AsyncSession
+        сессия БД
+    :param id_post: int
+        id поста
+    :param id_user: int
+        id пользователя
+    :return: bool
+        результат выполнения
+    """
+    logger.info(
+        "Start add like from user with id %d fot post with id %d", id_user, id_post
+    )
+    user: User = await session.get(User, id_user)
+
+    stmt = select(Post).where(Post.id == id_post).options(selectinload(Post.like_user))
+    res: Result = await session.execute(stmt)
+    post: Post = res.scalars().first()
+    # проверка принадлежности поста пользователю
+    if post.id_user == id_user:
+        logger.info("Post belongs to the user")
+        return False
+    try:
+        post.like_user.append(user)
+        await session.commit()
+    except SQLAlchemyError as exp:
+        logger.exception(f"Error db {exp}")
+        await session.rollback()
+        return False
+    else:
+        logger.info("Like to post add complete")
+        return True
