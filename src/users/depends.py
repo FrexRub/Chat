@@ -1,3 +1,4 @@
+import jwt
 from fastapi import Depends, status
 from fastapi.security import APIKeyCookie, APIKeyHeader
 from fastapi.exceptions import HTTPException
@@ -23,7 +24,14 @@ async def current_active_user(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="User not authorized"
         )
-    payload = decode_jwt(token)
+
+    try:
+        payload = decode_jwt(token)
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="User not authorized"
+        )
+
     id_user: int = int(payload["sub"])
     user: User = await get_user_by_id(session=session, id_user=id_user)
     if not user.is_active:

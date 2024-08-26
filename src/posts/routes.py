@@ -1,7 +1,7 @@
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends, Path, Request, status, Response
-from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends, Path, Request, status, Response, Form
+from fastapi.responses import JSONResponse, HTMLResponse
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -30,6 +30,14 @@ async def get_all_posts(session: AsyncSession = Depends(get_async_session)):
     return posts
 
 
+@router.get("/new_post/", name="posts:new_post", response_class=HTMLResponse)
+def add_new_post_form(request: Request) -> HTMLResponse:
+    return templates.TemplateResponse(
+        request=request,
+        name="posts/add_post.html",
+    )
+
+
 @router.get("/{id}")
 async def get_posts_user_by_id(
     id: Annotated[int, Path()],
@@ -40,13 +48,15 @@ async def get_posts_user_by_id(
     return posts
 
 
-@router.post("/", response_class=JSONResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_class=HTMLResponse, status_code=status.HTTP_201_CREATED)
 async def create_new_post(
     request: Request,
-    post: PostCreate,
+    title: str = Form(),
+    content: str = Form(),
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_active_user),
-):
+) -> HTMLResponse:
+    post: PostCreate = PostCreate(title=title, body=content)
     try:
         id: int = await add_new_post(session=session, post=post, id_user=user.id)
     except ExceptDB:
@@ -59,7 +69,13 @@ async def create_new_post(
             },
             status_code=404,
         )
-    return {"id": id}
+    posts: list[PostWithAutor] = await get_post_with_user_from_db(session=session)
+    return templates.TemplateResponse(
+        request=request,
+        name="index.html",
+        context={"posts": posts},
+    )
+    # return {"id": id}
 
 
 @router.delete("/{id}", response_class=JSONResponse)
