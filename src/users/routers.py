@@ -13,6 +13,8 @@ from src.users.crud import get_user_from_db, create_user, add_user_to_db
 from src.core.exceptions import NotFindUser, ExceptDB
 from src.core.jwt_utils import validate_password, encode_jwt, set_cookie
 from src.users.depends import current_active_user
+from src.posts.schemas import PostWithAutor
+from src.posts.crud import get_post_with_user_from_db
 
 router = APIRouter(prefix="/users", tags=["User"])
 
@@ -26,10 +28,16 @@ def registration_form(request: Request) -> HTMLResponse:
 
 
 @router.get("/logout", name="users:disconnect", response_class=HTMLResponse)
-def logout(response: Response, request: Request):
+async def logout(
+    response: Response,
+    request: Request,
+    session: AsyncSession = Depends(get_async_session),
+):
+    posts: list[PostWithAutor] = await get_post_with_user_from_db(session=session)
     response: Response = templates.TemplateResponse(
         request=request,
         name="index.html",
+        context={"posts": posts},
     )
     response.delete_cookie(COOKIE_NAME)
     return response
@@ -69,9 +77,11 @@ async def login(
     # resp = RedirectResponse(
     #     url="/users/protected-route", status_code=status.HTTP_302_FOUND
     # )
+    posts: list[PostWithAutor] = await get_post_with_user_from_db(session=session)
     resp: Response = templates.TemplateResponse(
         request=request,
         name="index.html",
+        context={"posts": posts},
     )
     set_cookie(resp, access_token)
     return resp
