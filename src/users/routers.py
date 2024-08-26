@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Request, Depends, Form, status
+from fastapi import APIRouter, Request, Depends, Form, status, Response
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.config import templates
+from src.core.config import templates, COOKIE_NAME
 from src.core.database import get_async_session
 from src.users.models import User
 from src.users.crud import get_user_from_db, create_user, add_user_to_db
@@ -25,8 +25,19 @@ def registration_form(request: Request) -> HTMLResponse:
     )
 
 
+@router.get("/logout", name="users:disconnect", response_class=HTMLResponse)
+def logout(response: Response, request: Request):
+    response: Response = templates.TemplateResponse(
+        request=request,
+        name="index.html",
+    )
+    response.delete_cookie(COOKIE_NAME)
+    return response
+
+
 @router.post("/login", name="users:login", response_class=JSONResponse)
 async def login(
+    request: Request,
     data: OAuth2PasswordRequestForm = Depends(),
     session: AsyncSession = Depends(get_async_session),
 ):
@@ -55,8 +66,12 @@ async def login(
     payload["exp"] = expire
     access_token = encode_jwt(payload)
 
-    resp = RedirectResponse(
-        url="/users/protected-route", status_code=status.HTTP_302_FOUND
+    # resp = RedirectResponse(
+    #     url="/users/protected-route", status_code=status.HTTP_302_FOUND
+    # )
+    resp: Response = templates.TemplateResponse(
+        request=request,
+        name="index.html",
     )
     set_cookie(resp, access_token)
     return resp
