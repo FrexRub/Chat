@@ -5,7 +5,7 @@ from sqlalchemy.future import select
 from src.users.crud import create_user
 from src.users.models import User
 from src.users.crud import add_user_to_db
-from src.core.jwt_utils import create_hash_password
+from src.core.jwt_utils import create_hash_password, create_jwt
 
 USERNAME = "Srub"
 EMAIL = "frexxx@mail.ru"
@@ -29,3 +29,8 @@ async def test_create_user(db_session):
     assert user.username == USERNAME
     num: int = await add_user_to_db(db_session, user)
     assert num == 1
+
+
+def test_create_jwt():
+    jwt: str = create_jwt("1")
+    assert jwt.count(".") == 2
