@@ -2,7 +2,7 @@ from typing import Annotated, Optional
 
 from fastapi import APIRouter, Depends, Path, Request, status, Response, Form
 from fastapi.responses import JSONResponse, HTMLResponse
-from fastapi.exceptions import HTTPException
+from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.database import get_async_session
@@ -39,6 +39,7 @@ def add_new_post_form(request: Request) -> HTMLResponse:
 
 
 @router.get("/{id}")
+@cache(expire=60)
 async def get_posts_user_by_id(
     id: Annotated[int, Path()],
     session: AsyncSession = Depends(get_async_session),
@@ -75,7 +76,6 @@ async def create_new_post(
         name="index.html",
         context={"posts": posts},
     )
-    # return {"id": id}
 
 
 @router.delete("/{id}", response_class=JSONResponse)
@@ -101,6 +101,7 @@ async def delete_post_by_id(
 
 
 @router.get("/users/", response_class=JSONResponse)
+@cache(expire=60)
 async def get_posts_with_user(
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_active_user),
