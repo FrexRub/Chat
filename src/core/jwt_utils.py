@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from fastapi import Response
 import bcrypt
 import jwt
@@ -88,3 +90,11 @@ def set_cookie(
     :return:
     """
     response.set_cookie(key=COOKIE_NAME, value=token, httponly=True)
+
+
+def create_jwt(user: str) -> str:
+    payload = dict()
+    payload["sub"] = user
+    expire = datetime.now(timezone.utc) + timedelta(seconds=900)
+    payload["exp"] = expire
+    return encode_jwt(payload)

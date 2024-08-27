@@ -11,7 +11,7 @@ from src.core.database import get_async_session
 from src.users.models import User
 from src.users.crud import get_user_from_db, create_user, add_user_to_db
 from src.core.exceptions import NotFindUser, ExceptDB
-from src.core.jwt_utils import validate_password, encode_jwt, set_cookie
+from src.core.jwt_utils import validate_password, encode_jwt, set_cookie, create_jwt
 from src.users.depends import current_active_user
 from src.posts.schemas import PostWithAutor
 from src.posts.crud import get_post_with_user_from_db
@@ -68,20 +68,14 @@ async def login(
             detail=f"Error password for login: {username}",
         )
 
-    payload = dict()
-    payload["sub"] = str(user.id)
-    expire = datetime.now(timezone.utc) + timedelta(seconds=900)
-    payload["exp"] = expire
-    access_token = encode_jwt(payload)
+    access_token: str = create_jwt(str(user.id))
 
-    # resp = RedirectResponse(
-    #     url="/users/protected-route", status_code=status.HTTP_302_FOUND
-    # )
     posts: list[PostWithAutor] = await get_post_with_user_from_db(session=session)
     resp: Response = templates.TemplateResponse(
         request=request,
         name="index.html",
         context={"posts": posts},
+        status_code=status.HTTP_302_FOUND,
     )
     set_cookie(resp, access_token)
     return resp
