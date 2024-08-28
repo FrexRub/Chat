@@ -3,9 +3,10 @@ from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import COOKIE_NAME
-from src.core.exceptions import ExceptDB, NotFindUser
+from src.core.exceptions import ExceptDB
 from src.core.jwt_utils import create_hash_password, create_jwt
 from src.posts.crud import add_new_post
+from src.posts.models import Post
 from src.posts.schemas import PostCreate
 from src.users.crud import add_user_to_db
 from src.users.models import User
@@ -73,5 +74,6 @@ async def test_endpoint_test(client: AsyncClient):
 
 async def test_add_new_post_bd(db_session: AsyncSession):
     post: PostCreate = PostCreate(title="Test", body="Test post")
-    id: int = await add_new_post(session=db_session, post=post, id_user=1)
-    assert id == 1
+    await add_new_post(session=db_session, post=post, id_user=1)
+    post_db: Post = await db_session.get(Post,1)
+    assert post_db.id == 1
