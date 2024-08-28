@@ -142,3 +142,15 @@ async def delete_like_post(
     if not res:
         response.status_code = 400
     return {"result": res}
+
+
+@router.post("/test")
+def post_test(
+    title: str = Form(),
+    content: str = Form(),
+    user: User = Depends(current_active_user),
+):
+    """
+    Тестовый эндпоинт для автотеста
+    """
+    return {"title": title, "content": content}
