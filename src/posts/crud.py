@@ -37,7 +37,7 @@ async def get_post_from_db(
     return list(posts)
 
 
-async def add_new_post(session: AsyncSession, post: PostCreate, id_user: int) -> int:
+async def add_new_post(session: AsyncSession, post: PostCreate, id_user: int) -> None:
     """
         Добавление поста в БД
     :param session: AsyncSession
@@ -46,8 +46,7 @@ async def add_new_post(session: AsyncSession, post: PostCreate, id_user: int) ->
         пост пользователя
     :param id_user: id_user
         id пользователя
-    :return: int
-        id нового поста
+    :return: None
     """
     new_post: Post = Post(**post.model_dump())
     new_post.id_user = id_user
@@ -57,7 +56,6 @@ async def add_new_post(session: AsyncSession, post: PostCreate, id_user: int) ->
     except SQLAlchemyError:
         logger.exception("Error add new post")
         raise ExceptDB("Error in DB")
-    return new_post.id
 
 
 async def delete_post(session: AsyncSession, id_post: int, id_user: int) -> bool:

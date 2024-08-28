@@ -1,15 +1,13 @@
-from datetime import datetime, timedelta, timezone
-
 from fastapi import APIRouter, Depends, Form, Request, Response, status
 from fastapi.exceptions import HTTPException
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import COOKIE_NAME, templates
 from src.core.database import get_async_session
 from src.core.exceptions import ExceptDB, NotFindUser
-from src.core.jwt_utils import (create_jwt, encode_jwt, set_cookie,
+from src.core.jwt_utils import (create_jwt, set_cookie,
                                 validate_password)
 from src.posts.crud import get_post_with_user_from_db
 from src.posts.schemas import PostWithAutor
@@ -91,7 +89,8 @@ async def regdata(
     session: AsyncSession = Depends(get_async_session),
 ):
     try:
-        find_user: User = await get_user_from_db(email=email, session=session)
+        # find_user: User = await get_user_from_db(email=email, session=session)
+        await get_user_from_db(email=email, session=session)
     except NotFindUser:
         user: User = create_user(username, email, password)
     else:

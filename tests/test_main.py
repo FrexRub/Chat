@@ -46,7 +46,7 @@ async def test_create_user_raises(db_session: AsyncSession):
     )
 
     with pytest.raises(ExceptDB):
-        num: int = await add_user_to_db(db_session, user)
+        await add_user_to_db(db_session, user)
 
 
 def test_create_jwt():
@@ -75,5 +75,5 @@ async def test_endpoint_test(client: AsyncClient):
 async def test_add_new_post_bd(db_session: AsyncSession):
     post: PostCreate = PostCreate(title="Test", body="Test post")
     await add_new_post(session=db_session, post=post, id_user=1)
-    post_db: Post = await db_session.get(Post,1)
+    post_db: Post = await db_session.get(Post, 1)
     assert post_db.id == 1
