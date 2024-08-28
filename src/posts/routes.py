@@ -54,7 +54,7 @@ async def create_new_post(
 ) -> HTMLResponse:
     post: PostCreate = PostCreate(title=title, body=content)
     try:
-        id: int = await add_new_post(session=session, post=post, id_user=user.id)
+        await add_new_post(session=session, post=post, id_user=user.id)
     except ExceptDB:
         return templates.TemplateResponse(
             request=request,
