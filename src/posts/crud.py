@@ -98,7 +98,6 @@ async def get_post_with_user_from_db(session: AsyncSession) -> list[PostWithAuto
     posts = await session.scalars(stmt)
     lst_posts: list[PostWithAutor] = list()
     for post in posts:  # type: Post
-        print(post.title, post.body, post.date_creation, post.user.username)
         post_with_author: PostWithAutor = PostWithAutor(
             user=post.user.username,
             title=post.title,
