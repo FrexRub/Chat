@@ -1,8 +1,9 @@
-FROM python:3.10-slim
+FROM python:3.11-slim
 
-RUN mkdir /app && mkdir /app/serts && mkdir /app/src
+RUN mkdir /app && mkdir /app/serts && mkdir /app/src && mkdir /app/docker
 
 WORKDIR /app
+RUN pip install --upgrade pip
 COPY poetry.lock pyproject.toml ./
 
 RUN python -m pip install --no-cache-dir poetry==1.8.3 \
@@ -11,6 +12,7 @@ RUN python -m pip install --no-cache-dir poetry==1.8.3 \
 
 COPY serts /app/serts
 COPY src /app/src
+COPY docker /app/docker
 
 RUN chmod a+x docker/*.sh     # разрешение на запуск скриптов из каталога docker
 
