@@ -1,16 +1,15 @@
-from typing import Optional
 import logging
+from typing import Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.engine import Result
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.users.models import User
-from src.core.exceptions import NotFindUser, ExceptDB
-from src.core.jwt_utils import create_hash_password
 from src.core.config import configure_logging
-
+from src.core.exceptions import ExceptDB, NotFindUser
+from src.core.jwt_utils import create_hash_password
+from src.users.models import User
 
 configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)

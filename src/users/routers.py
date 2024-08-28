@@ -1,20 +1,21 @@
 from datetime import datetime, timedelta, timezone
 
-from fastapi import APIRouter, Request, Depends, Form, status, Response
+from fastapi import APIRouter, Depends, Form, Request, Response, status
+from fastapi.exceptions import HTTPException
 from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.exceptions import HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.config import templates, COOKIE_NAME
+from src.core.config import COOKIE_NAME, templates
 from src.core.database import get_async_session
-from src.users.models import User
-from src.users.crud import get_user_from_db, create_user, add_user_to_db
-from src.core.exceptions import NotFindUser, ExceptDB
-from src.core.jwt_utils import validate_password, encode_jwt, set_cookie, create_jwt
-from src.users.depends import current_active_user
-from src.posts.schemas import PostWithAutor
+from src.core.exceptions import ExceptDB, NotFindUser
+from src.core.jwt_utils import (create_jwt, encode_jwt, set_cookie,
+                                validate_password)
 from src.posts.crud import get_post_with_user_from_db
+from src.posts.schemas import PostWithAutor
+from src.users.crud import add_user_to_db, create_user, get_user_from_db
+from src.users.depends import current_active_user
+from src.users.models import User
 
 router = APIRouter(prefix="/users", tags=["User"])
 

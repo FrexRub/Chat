@@ -1,7 +1,7 @@
-from typing import Optional, TYPE_CHECKING
 from datetime import datetime
+from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import DateTime, func, Boolean
+from sqlalchemy import Boolean, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.core.database import Base

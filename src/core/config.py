@@ -1,9 +1,9 @@
-from pathlib import Path
 import logging
+from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
-from pydantic_settings import BaseSettings
 from pydantic import BaseModel
+from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).parent.parent.parent
 

@@ -1,15 +1,14 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 
-from src.users.models import User
-from src.users.crud import add_user_to_db
-from src.core.jwt_utils import create_hash_password, create_jwt
 from src.core.config import COOKIE_NAME
-from src.core.exceptions import NotFindUser, ExceptDB
-from src.posts.schemas import PostCreate
+from src.core.exceptions import ExceptDB, NotFindUser
+from src.core.jwt_utils import create_hash_password, create_jwt
 from src.posts.crud import add_new_post
+from src.posts.schemas import PostCreate
+from src.users.crud import add_user_to_db
+from src.users.models import User
 
 USERNAME = "Srub"
 EMAIL = "frexxx@mail.ru"

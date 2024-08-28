@@ -1,18 +1,17 @@
-from typing import Optional
 import logging
+from typing import Optional
 
-from sqlalchemy import select, desc
-from sqlalchemy.orm import joinedload, selectinload
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import desc, select
 from sqlalchemy.engine import Result
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload, selectinload
 
-from src.posts.models import Post
-from src.posts.schemas import PostCreate, PostWithAutor
 from src.core.config import configure_logging
 from src.core.exceptions import ExceptDB
+from src.posts.models import Post
+from src.posts.schemas import PostCreate, PostWithAutor
 from src.users.models import User
-
 
 configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)

@@ -1,14 +1,14 @@
 import jwt
 from fastapi import Depends, status
-from fastapi.security import APIKeyCookie, APIKeyHeader
 from fastapi.exceptions import HTTPException
+from fastapi.security import APIKeyCookie, APIKeyHeader
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import COOKIE_NAME
-from src.core.jwt_utils import decode_jwt
-from src.users.models import User
 from src.core.database import get_async_session
+from src.core.jwt_utils import decode_jwt
 from src.users.crud import get_user_by_id
+from src.users.models import User
 
 cookie_scheme = APIKeyCookie(name=COOKIE_NAME)
 header_scheme = APIKeyHeader(

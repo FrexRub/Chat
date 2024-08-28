@@ -3,15 +3,11 @@ from typing import AsyncGenerator, Generator
 
 import pytest_asyncio
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import (
-    AsyncSession,
-    async_sessionmaker,
-    create_async_engine,
-    AsyncEngine,
-)
+from sqlalchemy.ext.asyncio import (AsyncEngine, AsyncSession,
+                                    async_sessionmaker, create_async_engine)
 
-from src.main import app
 from src.core.database import Base, get_async_session
+from src.main import app
 
 SQLALCHEMY_DATABASE_URL = "sqlite+aiosqlite:///test.sqlite3"
 

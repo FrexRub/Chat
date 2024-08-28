@@ -1,23 +1,18 @@
 from typing import Annotated, Optional
 
-from fastapi import APIRouter, Depends, Path, Request, status, Response, Form
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi import APIRouter, Depends, Form, Path, Request, Response, status
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi_cache.decorator import cache
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.database import get_async_session
 from src.core.config import templates
+from src.core.database import get_async_session
 from src.core.exceptions import ExceptDB
+from src.posts.crud import (add_like_post, add_new_post, delete_like_post_db,
+                            delete_post, get_post_from_db,
+                            get_post_with_user_from_db)
 from src.posts.models import Post
 from src.posts.schemas import PostCreate, PostWithAutor
-from src.posts.crud import (
-    get_post_from_db,
-    add_new_post,
-    delete_post,
-    get_post_with_user_from_db,
-    add_like_post,
-    delete_like_post_db,
-)
 from src.users.depends import current_active_user
 from src.users.models import User
 

@@ -1,23 +1,22 @@
 import logging
+from contextlib import asynccontextmanager
 from typing import AsyncIterator
 
-from fastapi import FastAPI, Request, Depends
-from fastapi.responses import HTMLResponse
+import uvicorn
+from fastapi import Depends, FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import HTMLResponse
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
-from sqlalchemy.ext.asyncio import AsyncSession
-import uvicorn
-from contextlib import asynccontextmanager
 from redis import asyncio as aioredis
-
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import configure_logging, templates
 from src.core.database import get_async_session
-from src.users.routers import router as router_users
+from src.posts.crud import get_post_with_user_from_db
 from src.posts.routes import router as router_posts
 from src.posts.schemas import PostWithAutor
-from src.posts.crud import get_post_with_user_from_db
+from src.users.routers import router as router_users
 
 configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)
