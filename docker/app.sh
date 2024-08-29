@@ -1,10 +1,9 @@
 #!/bin/bash
 
-alembic upgrade head
+#cd src
+#cd app
 
-cd src
-
-gunicorn main:app --workers 4 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000
-
+.venv/bin/alembic upgrade head
+.venv/bin/gunicorn src.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind=0.0.0.0:8000
 
 ## скрипт для запуска миграции и сервера
