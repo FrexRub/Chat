@@ -7,12 +7,15 @@ from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).parent.parent.parent
 
+DIR_TEMPLATES = Path(__file__).parent.parent / "templates"
+
 DB_PATH = BASE_DIR / "chat.sqlite3"
 
 COOKIE_NAME = "bonds_chat"
 
 
-templates = Jinja2Templates("templates")
+# templates = Jinja2Templates("templates")
+templates = Jinja2Templates(directory=DIR_TEMPLATES)
 
 
 def configure_logging(level=logging.INFO):
