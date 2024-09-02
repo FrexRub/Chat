@@ -20,6 +20,7 @@ python-multipart = "^0.0.9"
 pyjwt = {extras = ["crypto"], version = "^2.9.0"}
 fastapi-cache2 = {extras = ["redis"], version = "^0.2.2"}
 gunicorn = "^23.0.0"
+celery = "^5.4.0"
 
 
 [tool.poetry.group.dev.dependencies]

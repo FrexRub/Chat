@@ -7,12 +7,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.core.config import templates
 from src.core.database import get_async_session
-from src.core.exceptions import ExceptDB
-from src.posts.crud import (add_like_post, add_new_post, delete_like_post_db,
-                            delete_post, get_post_from_db,
-                            get_post_with_user_from_db)
+from src.core.exceptions import ExceptDB, ExceptUser
+from src.posts.crud import (
+    add_like_post,
+    add_new_post,
+    delete_like_post_db,
+    delete_post,
+    get_post_from_db,
+    get_post_with_user_from_db,
+)
 from src.posts.models import Post
-from src.posts.schemas import PostCreate, PostWithAutor
+from src.posts.schemas import PostCreate, PostWithAutor, PostInfo
 from src.users.depends import current_active_user
 from src.users.models import User
 
@@ -115,10 +120,16 @@ async def post_like_post(
     id: Annotated[int, Path(gt=0)],
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(current_active_user),
-) -> Optional[dict[str, bool]]:
-    res: bool = await add_like_post(session=session, id_post=id, id_user=user.id)
-    if not res:
+):
+    try:
+        res: PostInfo = await add_like_post(session=session, id_post=id, id_user=user.id)
+    except ExceptUser:
         response.status_code = 400
+        return {"result": "Error User"}
+    except ExceptDB:
+        response.status_code = 400
+        return {"result": "Error BD"}
+
     return {"result": res}
 
 
