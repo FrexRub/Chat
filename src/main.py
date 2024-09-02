@@ -11,7 +11,7 @@ from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from src.core.config import configure_logging, templates
+from src.core.config import configure_logging, templates, setting
 from src.core.database import get_async_session
 from src.posts.crud import get_post_with_user_from_db
 from src.posts.routes import router as router_posts
@@ -24,7 +24,12 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    redis = aioredis.from_url("redis://localhost")
+    # redis = aioredis.from_url("redis://localhost")
+    redis = aioredis.from_url(
+        f"redis://{setting.REDIS_HOST}:{setting.REDIS_PORT}",
+        encoding="utf8",
+        decode_responses=True,
+    )
     FastAPICache.init(RedisBackend(redis), prefix="fastapi-cache")
     yield
 

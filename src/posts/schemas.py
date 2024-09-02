@@ -21,3 +21,10 @@ class PostWithAutor(BaseModel):
     title: str
     body: str
     data_create: datetime
+
+
+class PostInfo(BaseModel):
+    title_post: str
+    name_user: str
+    email: str
+    name_friend: str

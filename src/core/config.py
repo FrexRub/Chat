@@ -3,7 +3,7 @@ from pathlib import Path
 
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 BASE_DIR = Path(__file__).parent.parent.parent
 
@@ -13,8 +13,6 @@ DB_PATH = BASE_DIR / "chat.sqlite3"
 
 COOKIE_NAME = "bonds_chat"
 
-
-# templates = Jinja2Templates("templates")
 templates = Jinja2Templates(directory=DIR_TEMPLATES)
 
 
@@ -35,15 +33,29 @@ class AuthJWT(BaseModel):
     private_key_path: Path = BASE_DIR / "serts" / "jwt-private.pem"
     public_key_path: Path = BASE_DIR / "serts" / "jwt-public.pem"
     algorithm: str = "RS256"
-    access_token_expire_minutes: int = 15
+    access_token_expire_minutes: int = 60
     refresh_token_expire_day: int = 30
 
 
-class Setting(BaseModel):
-
+class Setting(BaseSettings):
     db: DbSetting = DbSetting()
-
     auth_jwt: AuthJWT = AuthJWT()
+
+    postgres_user: str = "test"
+    postgres_password: str = "test"
+    postgres_db: str = "testdb"
+    postgres_host: str = "localhost"
+    postgres_port: int = 5438
+
+    REDIS_HOST: str
+    REDIS_PORT: int
+
+    SMTP_USER: str
+    SMTP_HOST: str
+    SMTP_PASSWORD: str
+    SMTP_PORT: int
+
+    model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
 
 setting = Setting()

@@ -8,9 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
 from src.core.config import configure_logging
-from src.core.exceptions import ExceptDB
+from src.core.exceptions import ExceptDB, ExceptUser
 from src.posts.models import Post
-from src.posts.schemas import PostCreate, PostWithAutor
+from src.posts.schemas import PostCreate, PostWithAutor, PostInfo
 from src.users.models import User
 
 configure_logging(logging.INFO)
@@ -108,7 +108,7 @@ async def get_post_with_user_from_db(session: AsyncSession) -> list[PostWithAuto
     return lst_posts
 
 
-async def add_like_post(session: AsyncSession, id_post: int, id_user: int) -> bool:
+async def add_like_post(session: AsyncSession, id_post: int, id_user: int) -> PostInfo:
     """
         Добавление лайка к посту
     :param session: AsyncSession
@@ -117,8 +117,8 @@ async def add_like_post(session: AsyncSession, id_post: int, id_user: int) -> bo
         id поста
     :param id_user: int
         id пользователя
-    :return: bool
-        результат выполнения
+    :return: PostInfo
+        информация о лайкнутом посте
     """
     logger.info(
         "Start add like from user with id %d fot post with id %d", id_user, id_post
@@ -131,22 +131,27 @@ async def add_like_post(session: AsyncSession, id_post: int, id_user: int) -> bo
     # проверка принадлежности поста пользователю
     if post.id_user == id_user:
         logger.info("Post belongs to the user")
-        return False
+        raise ExceptUser("This user's post")
+
+    user_post: User = await session.get(User, post.id_user)
     try:
         post.like_user.append(user)
         await session.commit()
     except SQLAlchemyError as exp:
         logger.exception(f"Error db {exp}")
         await session.rollback()
-        return False
+        raise ExceptDB("Error in DB")
     else:
         logger.info("Like to post add complete")
-        return True
+        return PostInfo(
+            title_post=post.title,
+            name_user=user_post.username,
+            email=user_post.email,
+            name_friend=user.username,
+        )
 
 
-async def delete_like_post_db(
-    session: AsyncSession, id_post: int, id_user: int
-) -> bool:
+async def delete_like_post_db(session: AsyncSession, id_post: int, id_user: int) -> bool:
     """
         Удаление лайка к посту
     :param session: AsyncSession

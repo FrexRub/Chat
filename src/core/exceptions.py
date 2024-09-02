@@ -4,3 +4,7 @@ class NotFindUser(Exception):
 
 class ExceptDB(Exception):
     pass
+
+
+class ExceptUser(Exception):
+    pass
