@@ -20,6 +20,7 @@ from src.posts.models import Post
 from src.posts.schemas import PostCreate, PostWithAutor, PostInfo
 from src.users.depends import current_active_user
 from src.users.models import User
+from src.tasks.tasks import send_email
 
 router = APIRouter(prefix="/posts", tags=["Post"])
 
@@ -129,7 +130,7 @@ async def post_like_post(
     except ExceptDB:
         response.status_code = 400
         return {"result": "Error BD"}
-
+    send_email.delay(res.model_dump())
     return {"result": res}
 
 
