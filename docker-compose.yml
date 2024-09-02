@@ -10,6 +10,8 @@ services:
   app:
     build:
       context: .
+    env_file:
+      - .env
     container_name: fastapi_app
     command: ["/app/docker/app.sh"]
     expose:
