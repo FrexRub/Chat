@@ -1,4 +1,4 @@
-from typing import Annotated, Optional
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Form, Path, Request, Response, status
 from fastapi.responses import HTMLResponse, JSONResponse
