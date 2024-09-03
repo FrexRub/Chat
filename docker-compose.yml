@@ -2,12 +2,20 @@ version: "3.9"
 services:
   redis:
     image: redis
-    container_name: redis_app
+#    container_name: redis_app
     command: --port 6379
     expose:
       - 6379
 
-  app:
+  db:
+    container_name: postgres_app
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+
+  web:
     build:
       context: .
     env_file:
@@ -20,3 +28,37 @@ services:
       - 8000:8000
     depends_on:
       - redis
+      - db
+
+  nginx:
+    container_name: nginx_app
+    build: ./nginx
+    volumes:
+      - ./var/log/nginx:/var/log/nginx
+    ports:
+      - 80:80
+    depends_on:
+      - web
+
+  celery:
+    build:
+      context: .
+    env_file:
+      - .env
+    container_name: celery_app
+    command: ["/app/docker/celery.sh", "celery"] # запуск скрипта для запуска celery
+    depends_on:
+      - redis
+
+  flower:
+    build:
+      context: .
+    env_file:
+      - .env
+    container_name: flower_app
+    command: ["/app/docker/celery.sh", "flower"]  # запуск скрипта для запуска flower
+    depends_on:
+      - redis
+      - celery
+    ports:
+      - 5555:5555
