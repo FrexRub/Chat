@@ -46,10 +46,7 @@ setting_conn = SettingConn()
 
 
 class DbSetting(BaseSettings):
-    # для докеров
-    url: str = "postgresql+asyncpg://postgres:admin@db:5432/chat_db"
-    # url: str = f"postgresql+asyncpg://{setting_conn.postgres_user}:{setting_conn.postgres_password}@{setting_conn.postgres_host}:{setting_conn.postgres_port}/{setting_conn.postgres_db}"
-
+    url: str = f"postgresql+asyncpg://{setting_conn.postgres_user}:{setting_conn.postgres_password}@{setting_conn.postgres_host}:{setting_conn.postgres_port}/{setting_conn.postgres_db}"
     # url: str = f"sqlite+aiosqlite:///{DB_PATH}"
     echo: bool = False
 

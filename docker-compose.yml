@@ -2,7 +2,7 @@ version: "3.9"
 services:
   redis:
     image: redis
-    container_name: redis_app
+#    container_name: redis_app
     command: --port 6379
     expose:
       - 6379
@@ -39,29 +39,26 @@ services:
       - 80:80
     depends_on:
       - web
-#    networks:
-#      - net
 
-#  celery:
-#    build:
-#      context: .
-#    env_file:
-#      - .env
-#    container_name: celery_app
-#    command: ["/app/docker/celery.sh", "celery"]
-##    command: .venv/bin/celery --app=src.tasks.tasks:celery worker -l INFO
-#    depends_on:
-#      - redis
-#
-#  flower:
-#    build:
-#      context: .
-#    env_file:
-#      - .env
-#    container_name: flower_app
-#    command: ["/app/docker/celery.sh", "flower"]  # запуск скрипта для запуска celery
-#    depends_on:
-#      - redis
-#      - celery
-#    ports:
-#      - 5555:5555
+  celery:
+    build:
+      context: .
+    env_file:
+      - .env
+    container_name: celery_app
+    command: ["/app/docker/celery.sh", "celery"] # запуск скрипта для запуска celery
+    depends_on:
+      - redis
+
+  flower:
+    build:
+      context: .
+    env_file:
+      - .env
+    container_name: flower_app
+    command: ["/app/docker/celery.sh", "flower"]  # запуск скрипта для запуска flower
+    depends_on:
+      - redis
+      - celery
+    ports:
+      - 5555:5555
