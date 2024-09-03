@@ -28,26 +28,28 @@ services:
       - 8000:8000
     depends_on:
       - redis
+      - db
 
-  celery:
-    build:
-      context: .
-    env_file:
-      - .env
-    container_name: celery_app
-    command: ["/fastapi_app/docker/celery.sh", "celery"]  # запуск скрипта для запуска celery
-    depends_on:
-      - redis
-
-  flower:
-    build:
-      context: .
-    env_file:
-      - .env
-    container_name: flower_app
-    command: ["/fastapi_app/docker/celery.sh", "flower"]  # запуск скрипта для запуска celery
-    depends_on:
-      - redis
-      - celery
-    ports:
-      - 5555:5555
+#  celery:
+#    build:
+#      context: .
+#    env_file:
+#      - .env
+#    container_name: celery_app
+#    command: ["/app/docker/celery.sh", "celery"]
+##    command: .venv/bin/celery --app=src.tasks.tasks:celery worker -l INFO
+#    depends_on:
+#      - redis
+#
+#  flower:
+#    build:
+#      context: .
+#    env_file:
+#      - .env
+#    container_name: flower_app
+#    command: ["/app/docker/celery.sh", "flower"]  # запуск скрипта для запуска celery
+#    depends_on:
+#      - redis
+#      - celery
+#    ports:
+#      - 5555:5555

@@ -22,6 +22,7 @@ fastapi-cache2 = {extras = ["redis"], version = "^0.2.2"}
 gunicorn = "^23.0.0"
 celery = {extras = ["redis"], version = "^5.4.0"}
 flower = "^2.0.1"
+asyncpg = "^0.29.0"
 
 
 [tool.poetry.group.dev.dependencies]
