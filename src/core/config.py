@@ -42,8 +42,18 @@ class SettingConn(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
 
+setting_conn = SettingConn()
+
+
 class DbSetting(BaseSettings):
-    url: str = f"sqlite+aiosqlite:///{DB_PATH}"
+    # для докеров
+    # DATABASE_URL = "postgresql+asyncpg://postgres:admin@db:5432/chat_db"
+    url = (
+        f"postgresql+asyncpg://{setting_conn.postgres_user}:{setting_conn.postgres_password}@{setting_conn.postgres_host}:"
+        f"{setting_conn.postgres_port}/{setting_conn.postgres_db}"
+    )
+
+    # url: str = f"sqlite+aiosqlite:///{DB_PATH}"
     echo: bool = False
 
 
@@ -61,4 +71,3 @@ class Setting(BaseSettings):
 
 
 setting = Setting()
-setting_conn = SettingConn()

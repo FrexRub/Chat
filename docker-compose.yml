@@ -7,6 +7,14 @@ services:
     expose:
       - 6379
 
+  db:
+    container_name: postgres_app
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+
   app:
     build:
       context: .
@@ -20,3 +28,26 @@ services:
       - 8000:8000
     depends_on:
       - redis
+
+  celery:
+    build:
+      context: .
+    env_file:
+      - .env
+    container_name: celery_app
+    command: ["/fastapi_app/docker/celery.sh", "celery"]  # запуск скрипта для запуска celery
+    depends_on:
+      - redis
+
+  flower:
+    build:
+      context: .
+    env_file:
+      - .env
+    container_name: flower_app
+    command: ["/fastapi_app/docker/celery.sh", "flower"]  # запуск скрипта для запуска celery
+    depends_on:
+      - redis
+      - celery
+    ports:
+      - 5555:5555
