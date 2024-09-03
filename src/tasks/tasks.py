@@ -4,10 +4,12 @@ from email.message import EmailMessage
 
 from celery import Celery
 
-from src.core.config import setting, configure_logging
+from src.core.config import setting_conn, configure_logging
 from src.posts.schemas import PostInfo
 
-celery = Celery("tasks", broker=f"redis://{setting.REDIS_HOST}:{setting.REDIS_PORT}")
+celery = Celery(
+    "tasks", broker=f"redis://{setting_conn.REDIS_HOST}:{setting_conn.REDIS_PORT}"
+)
 
 configure_logging(logging.INFO)
 logger = logging.getLogger(__name__)
@@ -16,7 +18,7 @@ logger = logging.getLogger(__name__)
 def get_email_for_send(info_about_like: dict[str, str]):
     email = EmailMessage()
     email["Subject"] = "Ваше сообщение было лайкнуто"
-    email["From"] = setting.SMTP_USER
+    email["From"] = setting_conn.SMTP_USER
     email["To"] = info_about_like["email"]
 
     email.set_content(
@@ -36,10 +38,10 @@ def get_email_for_send(info_about_like: dict[str, str]):
 def send_email(info_about_like: dict[str, str]):
     logger.info(f"Start send email to {info_about_like['email']}")
     email = get_email_for_send(info_about_like)
-    with smtplib.SMTP(setting.SMTP_HOST, setting.SMTP_PORT) as server:
+    with smtplib.SMTP(setting_conn.SMTP_HOST, setting_conn.SMTP_PORT) as server:
         try:
             server.starttls()
-            server.login(setting.SMTP_USER, setting.SMTP_PASSWORD)
+            server.login(setting_conn.SMTP_USER, setting_conn.SMTP_PASSWORD)
             server.send_message(email)
         except smtplib.SMTPException as exp:
             logger.exception(f"Error send mail, {exp}")

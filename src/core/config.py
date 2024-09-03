@@ -24,23 +24,7 @@ def configure_logging(level=logging.INFO):
     )
 
 
-class DbSetting(BaseSettings):
-    url: str = f"sqlite+aiosqlite:///{DB_PATH}"
-    echo: bool = False
-
-
-class AuthJWT(BaseModel):
-    private_key_path: Path = BASE_DIR / "serts" / "jwt-private.pem"
-    public_key_path: Path = BASE_DIR / "serts" / "jwt-public.pem"
-    algorithm: str = "RS256"
-    access_token_expire_minutes: int = 60
-    refresh_token_expire_day: int = 30
-
-
-class Setting(BaseSettings):
-    db: DbSetting = DbSetting()
-    auth_jwt: AuthJWT = AuthJWT()
-
+class SettingConn(BaseSettings):
     postgres_user: str = "test"
     postgres_password: str = "test"
     postgres_db: str = "testdb"
@@ -58,4 +42,23 @@ class Setting(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env")
 
 
+class DbSetting(BaseSettings):
+    url: str = f"sqlite+aiosqlite:///{DB_PATH}"
+    echo: bool = False
+
+
+class AuthJWT(BaseModel):
+    private_key_path: Path = BASE_DIR / "serts" / "jwt-private.pem"
+    public_key_path: Path = BASE_DIR / "serts" / "jwt-public.pem"
+    algorithm: str = "RS256"
+    access_token_expire_minutes: int = 60
+    refresh_token_expire_day: int = 30
+
+
+class Setting(BaseSettings):
+    db: DbSetting = DbSetting()
+    auth_jwt: AuthJWT = AuthJWT()
+
+
 setting = Setting()
+setting_conn = SettingConn()
